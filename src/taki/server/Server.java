@@ -1,7 +1,15 @@
-import java.io.*;
-import java.net.*;
+package taki.server;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+
+import taki.common.ChatMessage;
+import taki.common.ChatMessage.MsgType;
 
 /*
  * The server that can be run both as a console application or a GUI
@@ -90,7 +98,7 @@ public class Server {
     /*
      * For the GUI to stop the server
      */
-	protected void stop() {
+	public void stop() {
 		keepGoing = false;
 		// connect to myself as Client to exit statement 
 		// Socket socket = serverSocket.accept();
@@ -147,37 +155,6 @@ public class Server {
 				return;
 			}
 		}
-	}
-	
-	/*
-	 *  To run as a console application just open a console window and: 
-	 * > java Server
-	 * > java Server portNumber
-	 * If the port number is not specified 1500 is used
-	 */ 
-	public static void main(String[] args) {
-		// start server on port 1500 unless a PortNumber is specified 
-		int portNumber = 1500;
-		switch(args.length) {
-			case 1:
-				try {
-					portNumber = Integer.parseInt(args[0]);
-				}
-				catch(Exception e) {
-					System.out.println("Invalid port number.");
-					System.out.println("Usage is: > java Server [portNumber]");
-					return;
-				}
-			case 0:
-				break;
-			default:
-				System.out.println("Usage is: > java Server [portNumber]");
-				return;
-				
-		}
-		// create a server object and start it
-		Server server = new Server(portNumber);
-		server.start();
 	}
 
 	/** One instance of this thread will run for each client */
@@ -244,14 +221,14 @@ public class Server {
 				// Switch on the type of message receive
 				switch(cm.getType()) {
 
-				case ChatMessage.MESSAGE:
+				case MESSAGE:
 					broadcast(username + ": " + message);
 					break;
-				case ChatMessage.LOGOUT:
+				case LOGOUT:
 					display(username + " disconnected with a LOGOUT message.");
 					keepGoing = false;
 					break;
-				case ChatMessage.WHOISIN:
+				case WHOISIN:
 					writeMsg("List of the users connected at " + sdf.format(new Date()) + "\n");
 					// scan al the users connected
 					for(int i = 0; i < al.size(); ++i) {

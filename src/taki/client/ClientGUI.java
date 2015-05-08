@@ -1,7 +1,24 @@
+package taki.client;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.GridLayout;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingConstants;
+
+import taki.common.ChatMessage;
+import taki.common.ChatMessage.CardType;
+import taki.common.ChatMessage.MsgType;
 
 
 /*
@@ -27,6 +44,7 @@ public class ClientGUI extends JFrame implements ActionListener {
 	// the default port number
 	private int defaultPort;
 	private String defaultHost;
+	private JComboBox comboBox;
 
 	// Constructor connection receiving a socket number
 	ClientGUI(String host, int port) {
@@ -43,6 +61,7 @@ public class ClientGUI extends JFrame implements ActionListener {
 		tfServer = new JTextField(host);
 		tfPort = new JTextField("" + port);
 		tfPort.setHorizontalAlignment(SwingConstants.RIGHT);
+		comboBox = new JComboBox(CardType.values());
 
 		serverAndPort.add(new JLabel("Server Address:  "));
 		serverAndPort.add(tfServer);
@@ -91,13 +110,13 @@ public class ClientGUI extends JFrame implements ActionListener {
 	}
 
 	// called by the Client to append text in the TextArea 
-	void append(String str) {
+	public void append(String str) {
 		ta.append(str);
 		ta.setCaretPosition(ta.getText().length() - 1);
 	}
 	// called by the GUI is the connection failed
 	// we reset our buttons, label, textfield
-	void connectionFailed() {
+	public void connectionFailed() {
 		login.setEnabled(true);
 		logout.setEnabled(false);
 		whoIsIn.setEnabled(false);
@@ -121,19 +140,19 @@ public class ClientGUI extends JFrame implements ActionListener {
 		Object o = e.getSource();
 		// if it is the Logout button
 		if(o == logout) {
-			client.sendMessage(new ChatMessage(ChatMessage.LOGOUT, ""));
+			client.sendMessage(new ChatMessage(MsgType.LOGOUT, ""));
 			return;
 		}
 		// if it the who is in button
 		if(o == whoIsIn) {
-			client.sendMessage(new ChatMessage(ChatMessage.WHOISIN, ""));				
+			client.sendMessage(new ChatMessage(MsgType.WHOISIN, ""));				
 			return;
 		}
 
 		// ok it is coming from the JTextField
 		if(connected) {
 			// just have to send the message
-			client.sendMessage(new ChatMessage(ChatMessage.MESSAGE, tf.getText()));				
+			client.sendMessage(new ChatMessage(MsgType.MESSAGE, tf.getText()));				
 			tf.setText("");
 			return;
 		}
@@ -183,10 +202,4 @@ public class ClientGUI extends JFrame implements ActionListener {
 		}
 
 	}
-
-	// to start the whole thing the server
-	public static void main(String[] args) {
-		new ClientGUI("localhost", 1500);
-	}
-
 }

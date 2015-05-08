@@ -1,4 +1,6 @@
+package taki.server;
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
 
@@ -53,11 +55,11 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
 
 	// append message to the two JTextArea
 	// position at the end
-	void appendRoom(String str) {
+	public void appendRoom(String str) {
 		chat.append(str);
 		chat.setCaretPosition(chat.getText().length() - 1);
 	}
-	void appendEvent(String str) {
+	public void appendEvent(String str) {
 		event.append(str);
 		event.setCaretPosition(chat.getText().length() - 1);
 		
@@ -90,12 +92,6 @@ public class ServerGUI extends JFrame implements ActionListener, WindowListener 
 		tPortNumber.setEditable(false);
 	}
 	
-	// entry point to start the Server
-	public static void main(String[] arg) {
-		// start server default port 1500
-		new ServerGUI(1500);
-	}
-
 	/*
 	 * If the user click the X button to close the application
 	 * I need to close the connection with the server to free the port
