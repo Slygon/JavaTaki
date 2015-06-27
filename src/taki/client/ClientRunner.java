@@ -6,7 +6,8 @@ import java.util.Scanner;
 import taki.common.ChatMessage;
 import taki.common.ChatMessage.MsgType;
 
-public class Main {
+public class ClientRunner {
+	
 	/*
 	 * To start the Client in console mode use one of the following command >
 	 * java Client > java Client username > java Client username portNumber >
@@ -19,8 +20,7 @@ public class Main {
 	 * In console mode, if an error occurs the program simply stops when a GUI
 	 * id used, the GUI is informed of the disconnection
 	 */
-	public static void main(String[] args) {
-
+	public static void startClient(String[] args) {
 		if (Arrays.asList(args).contains("ui")) {
 			new ClientGUI("localhost", 1500);
 		} else {
@@ -84,8 +84,10 @@ public class Main {
 					client.sendMessage(new ChatMessage(MsgType.MESSAGE, msg));
 				}
 			}
+			scan.close();
 			// done disconnect
 			client.disconnect();
 		}
 	}
+	
 }

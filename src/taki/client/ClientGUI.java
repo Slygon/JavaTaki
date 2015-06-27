@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -17,7 +16,6 @@ import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
 import taki.common.ChatMessage;
-import taki.common.ChatMessage.CardType;
 import taki.common.ChatMessage.MsgType;
 
 
@@ -44,10 +42,10 @@ public class ClientGUI extends JFrame implements ActionListener {
 	// the default port number
 	private int defaultPort;
 	private String defaultHost;
-	private JComboBox comboBox;
+//	private JComboBox<CardType> comboBox;
 
 	// Constructor connection receiving a socket number
-	ClientGUI(String host, int port) {
+	public ClientGUI(String host, int port) {
 
 		super("Chat Client");
 		defaultPort = port;
@@ -61,7 +59,7 @@ public class ClientGUI extends JFrame implements ActionListener {
 		tfServer = new JTextField(host);
 		tfPort = new JTextField("" + port);
 		tfPort.setHorizontalAlignment(SwingConstants.RIGHT);
-		comboBox = new JComboBox(CardType.values());
+//		comboBox = new JComboBox<CardType>(CardType.values());
 
 		serverAndPort.add(new JLabel("Server Address:  "));
 		serverAndPort.add(tfServer);

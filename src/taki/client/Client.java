@@ -1,15 +1,18 @@
 package taki.client;
 
-import java.net.*;
-import java.io.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
+import java.net.Socket;
+import java.util.Observable;
+import java.util.Observer;
 
 import taki.common.ChatMessage;
 
 /*
  * The Client that can be run both as a console or a GUI
  */
-public class Client  {
+public class Client {
 
 	// for I/O
 	private ObjectInputStream sInput;		// to read from the socket
@@ -29,7 +32,7 @@ public class Client  {
 	 *  port: the port number
 	 *  username: the username
 	 */
-	Client(String server, int port, String username) {
+	public Client(String server, int port, String username) {
 		// which calls the common constructor with the GUI set to null
 		this(server, port, username, null);
 	}
@@ -75,7 +78,7 @@ public class Client  {
 		}
 
 		// creates the Thread to listen from the server 
-		new ListenFromServer().start();
+		new ListenFromServerThread(cg, sInput).start();
 		// Send our username to the server this is the only message that we
 		// will send as a String. All other messages will be ChatMessage objects
 		try
@@ -117,7 +120,7 @@ public class Client  {
 	 * When something goes wrong
 	 * Close the Input/Output streams and disconnect not much to do in the catch clause
 	 */
-	void disconnect() {
+	public void disconnect() {
 		try { 
 			if(sInput != null) sInput.close();
 		}
@@ -135,38 +138,5 @@ public class Client  {
 		if(cg != null)
 			cg.connectionFailed();
 			
-	}
-	
-
-	/*
-	 * a class that waits for the message from the server and append them to the JTextArea
-	 * if we have a GUI or simply System.out.println() it in console mode
-	 */
-	class ListenFromServer extends Thread {
-
-		public void run() {
-			while(true) {
-				try {
-					String msg = (String) sInput.readObject();
-					// if console mode print the message and add back the prompt
-					if(cg == null) {
-						System.out.println(msg);
-						System.out.print("> ");
-					}
-					else {
-						cg.append(msg);
-					}
-				}
-				catch(IOException e) {
-					display("Server has close the connection: " + e);
-					if(cg != null) 
-						cg.connectionFailed();
-					break;
-				}
-				// can't happen with a String object but need the catch anyhow
-				catch(ClassNotFoundException e2) {
-				}
-			}
-		}
 	}
 }
