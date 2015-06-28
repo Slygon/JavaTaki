@@ -39,7 +39,8 @@ public class ChatMessage implements Serializable {
 	public enum MsgType {
 		WHOISIN,
 		MESSAGE,
-		LOGOUT
+		LOGOUT,
+		CARD_CHOSEN
 	}
 
 	protected static final long serialVersionUID = 1112122200L;
@@ -55,7 +56,16 @@ public class ChatMessage implements Serializable {
 //	public static final int LOGOUT = 2;
 	private MsgType type;
 	private String message;
+	private CardType cardType;
 	
+	public CardType getCardType() {
+		return cardType;
+	}
+
+	public void setCardType(CardType cardType) {
+		this.cardType = cardType;
+	}
+
 	// constructor
 	public ChatMessage(MsgType type, String message) {
 		this.type = type;

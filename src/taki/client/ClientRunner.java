@@ -22,7 +22,8 @@ public class ClientRunner {
 	 */
 	public static void startClient(String[] args) {
 		if (Arrays.asList(args).contains("ui")) {
-			new ClientGUI("localhost", 1500);
+//			new ClientGUI("localhost", 1500);
+			new newClientGUI("localhost", 1500);
 		} else {
 
 			// default values

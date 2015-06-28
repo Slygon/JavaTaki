@@ -20,7 +20,7 @@ public class Client {
 	private Socket socket;
 
 	// if I use a GUI or not
-	private ClientGUI cg;
+	private ClientHandler _clientHandler;
 	
 	// the server, the port and the username
 	private String server, username;
@@ -41,12 +41,12 @@ public class Client {
 	 * Constructor call when used from a GUI
 	 * in console mode the ClienGUI parameter is null
 	 */
-	public Client(String server, int port, String username, ClientGUI cg) {
+	public Client(String server, int port, String username, ClientHandler ch) {
 		this.server = server;
 		this.port = port;
 		this.username = username;
 		// save if we are in GUI mode or not
-		this.cg = cg;
+		this._clientHandler = ch;
 	}
 	
 	/*
@@ -59,10 +59,13 @@ public class Client {
 		} 
 		// if it failed not much I can so
 		catch(Exception ec) {
-			display("Error connectiong to server:" + ec);
+//			display("Error connectiong to server:" + ec);
+			display("Could not connect to server " + server + " on port " + port);
+			_clientHandler.onConnectionFailed("Could not connect to server " + server + " on port " + port);
 			return false;
 		}
 		
+		_clientHandler.onConnected();
 		String msg = "Connection accepted " + socket.getInetAddress() + ":" + socket.getPort();
 		display(msg);
 	
@@ -78,7 +81,7 @@ public class Client {
 		}
 
 		// creates the Thread to listen from the server 
-		new ListenFromServerThread(cg, sInput).start();
+		new ListenFromServerThread(_clientHandler, sInput).start();
 		// Send our username to the server this is the only message that we
 		// will send as a String. All other messages will be ChatMessage objects
 		try
@@ -98,10 +101,10 @@ public class Client {
 	 * To send a message to the console or the GUI
 	 */
 	private void display(String msg) {
-		if(cg == null)
+		if(_clientHandler == null)
 			System.out.println(msg);      // println in console mode
 		else
-			cg.append(msg + "\n");		// append to the ClientGUI JTextArea (or whatever)
+			_clientHandler.append(msg + "\n");		// append to the ClientGUI JTextArea (or whatever)
 	}
 	
 	/*
@@ -135,8 +138,8 @@ public class Client {
 		catch(Exception e) {} // not much else I can do
 		
 		// inform the GUI
-		if(cg != null)
-			cg.connectionFailed();
+		if(_clientHandler != null)
+			_clientHandler.onConnectionFailed("Client disconnected !");
 			
 	}
 }

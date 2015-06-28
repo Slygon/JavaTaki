@@ -11,9 +11,9 @@ import java.util.Observer;
 public class ListenFromServerThread extends Thread {
 
 	ObjectInputStream _sInput;
-	ClientGUI _cg;
+	ClientHandler _cg;
 	
-	public ListenFromServerThread(ClientGUI cg, ObjectInputStream sInput) {
+	public ListenFromServerThread(ClientHandler cg, ObjectInputStream sInput) {
 		_sInput = sInput;
 		_cg = cg;
 	}
@@ -33,7 +33,7 @@ public class ListenFromServerThread extends Thread {
 			}
 			catch(IOException e) {
 				if(_cg != null) 
-					_cg.connectionFailed();
+					_cg.onConnectionFailed("Connection lost !");
 				break;
 			}
 			// can't happen with a String object but need the catch anyhow

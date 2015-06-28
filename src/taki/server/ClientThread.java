@@ -63,7 +63,8 @@ public class ClientThread extends Thread {
 				_cm = (ChatMessage) _sInput.readObject();
 			}
 			catch (IOException e) {
-				_server.display(_username + " Exception reading Streams: " + e);
+//				_server.display(_username + " Exception reading Streams: " + e);
+				_server.display(_username + " has disconnected");
 				break;				
 			}
 			catch(ClassNotFoundException e2) {

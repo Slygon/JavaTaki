@@ -4,6 +4,7 @@ import java.awt.EventQueue;
 import java.util.Arrays;
 
 import taki.client.ClientRunner;
+import taki.client.newClientGUI;
 import taki.server.ServerRunner;
 
 public class Run {
