@@ -22,7 +22,7 @@ import javax.swing.SwingConstants;
 import org.eclipse.swt.widgets.Display;
 
 import taki.common.ChatMessage;
-import taki.common.ChatMessage.CardType;
+//import taki.common.ChatMessage.CardType;
 import taki.common.ChatMessage.MsgType;
 
 /*
@@ -48,7 +48,7 @@ public class ClientGUI extends JFrame implements ActionListener, ClientHandler {
 	// the default port number
 	private int defaultPort;
 	private String defaultHost;
-	private JComboBox<CardType> comboBox;
+//	private JComboBox<CardType> comboBox;
 
 	// Constructor connection receiving a socket number
 	public ClientGUI(String host, int port) {
@@ -105,7 +105,7 @@ public class ClientGUI extends JFrame implements ActionListener, ClientHandler {
 									// is in
 		chooseCard.setEnabled(false);
 
-		comboBox = new JComboBox<CardType>(CardType.values());
+//		comboBox = new JComboBox<CardType>(CardType.values());
 
 		JPanel centerPanel = new JPanel(new GridLayout(1, 2));
 		centerPanel.add(new JScrollPane(ta));
@@ -113,7 +113,7 @@ public class ClientGUI extends JFrame implements ActionListener, ClientHandler {
 
 		JPanel rightPanel = new JPanel(new GridBagLayout());
 		rightPanel.add(new Canvas());
-		rightPanel.add(comboBox);
+//		rightPanel.add(comboBox);
 		centerPanel.add(rightPanel);
 
 		JPanel southPanel = new JPanel();
@@ -158,12 +158,12 @@ public class ClientGUI extends JFrame implements ActionListener, ClientHandler {
 			client.sendMessage(new ChatMessage(MsgType.WHOISIN, ""));
 			return;
 		}
-		if (o == chooseCard) {
-			ChatMessage chatMessage = new ChatMessage(MsgType.CARD_CHOSEN, "");
-			chatMessage.setCardType(CardType.ACE);
-			client.sendMessage(chatMessage);
-			return;
-		}
+//		if (o == chooseCard) {
+//			ChatMessage chatMessage = new ChatMessage(MsgType.CARD_CHOSEN, "");
+//			chatMessage.setCardType(CardType.ACE);
+//			client.sendMessage(chatMessage);
+//			return;
+//		}
 
 		// ok it is coming from the JTextField
 		if (connected) {

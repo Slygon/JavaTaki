@@ -9,39 +9,12 @@ import java.io.*;
  */
 public class ChatMessage implements Serializable {
 	
-	public enum CardType {
-		ZERO,
-		ONE,
-		TWO,
-		THREE,
-		FOUR,
-		FIVE,
-		SIX,
-		SEVEN,
-		EIGHT,
-		NINE,
-		TEN,
-		JACK,
-		QUEEN,
-		KING,
-		ACE,
-		STOP,		
-		CRAZYCARD,
-		PLUS,
-		PLUSTWO,
-		PLUSTHREE,
-		SWITCHDIR,
-		SWITCHCOLOR,
-		TAKI,
-		SUPERTAKI
-	}
 	
 	public enum MsgType {
 		WHOISIN,
 		MESSAGE,
 		LOGOUT,
-		CARD_CHOSEN,
-		USERNAME_TAKEN
+		CARD_CHOSEN
 	}
 
 	protected static final long serialVersionUID = 1112122200L;
@@ -57,18 +30,9 @@ public class ChatMessage implements Serializable {
 //	public static final int LOGOUT = 2;
 	private MsgType type;
 	private String message;
-	private CardType cardType;
 	
 	public MsgType getMsgType() {
 		return type;
-	}
-	
-	public CardType getCardType() {
-		return cardType;
-	}
-
-	public void setCardType(CardType cardType) {
-		this.cardType = cardType;
 	}
 
 	// constructor

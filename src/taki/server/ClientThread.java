@@ -103,7 +103,7 @@ public class ClientThread extends Thread {
 			switch(_cm.getType()) {
 
 			case MESSAGE:
-				_server.broadcast(_username + ": " + message);
+				_server.broadcast(new ChatMessage(ChatMessage.MsgType.MESSAGE, _username + ": " + message));
 				break;
 			case LOGOUT:
 				_server.display(_username + " disconnected with a LOGOUT message.");

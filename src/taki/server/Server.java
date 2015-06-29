@@ -1,16 +1,13 @@
 package taki.server;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-import taki.common.ChatMessage;
+import taki.common.SystemMessage;
 import taki.common.UserList;
-import taki.common.ChatMessage.MsgType;
 
 /*
  * The server that can be run both as a console application or a GUI
@@ -88,7 +85,7 @@ public class Server {
 					t.start();
 					onClientConnected(t);
 				} else {
-					t.writeMsg(new ChatMessage(MsgType.USERNAME_TAKEN, "UsernameAlready Exists"));
+					t.writeMsg(new SystemMessage(SystemMessage.MsgType.USERNAME_TAKEN, "Username already taken"));
 					t.close();
 				}
 			}

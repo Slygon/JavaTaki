@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import taki.common.ChatMessage;
 import taki.common.ChatMessage.MsgType;
+import taki.common.SystemMessage;
 import taki.common.UserList;
 
 /*
@@ -28,24 +29,17 @@ public class ListenFromServerThread extends Thread {
 				Object msg = _sInput.readObject();
 
 				if (msg instanceof UserList) {
-					ArrayList<String> alUsers = ((UserList) msg).getUsers();
-					_cg.onUserListRecieved(alUsers);
+					handleUserList(((UserList) msg));
 				} else if (msg instanceof ChatMessage) {
 					ChatMessage chatMSG = (ChatMessage) msg;
+					handleChatMessage((ChatMessage)chatMSG);
 					
-					if (chatMSG.getMsgType() == MsgType.USERNAME_TAKEN) {
-						_cg.onConnectionFailed("Username already taken.");
+				} else if (msg instanceof SystemMessage) {
+					if (!handleSystemMsg((SystemMessage)msg)) {
 						break;
 					}
-					
 				} else if (msg instanceof String) {
-					// if console mode print the message and add back the prompt
-					if (_cg == null) {
-						System.out.println(msg);
-						System.out.print("> ");
-					} else {
-						_cg.append(msg.toString());
-					}
+					handleSimpleMsg(msg.toString());
 				}
 			} catch (IOException e) {
 				if (_cg != null)
@@ -56,5 +50,37 @@ public class ListenFromServerThread extends Thread {
 			catch (ClassNotFoundException e2) {
 			}
 		}
+	}
+	
+	private void handleSimpleMsg(String str) {
+		printMsg("[Server] " + str);
+	}
+
+	private void handleChatMessage(ChatMessage chatMsg) {
+		printMsg("[Chat] " + chatMsg.getMessage());
+	}
+	
+	private void printMsg(String str) {
+		// if console mode print the message and add back the prompt
+		if (_cg == null) {
+			System.out.println(str);
+			System.out.print("> ");
+		} else {
+			_cg.append(str);
+		}	
+	}
+
+	private boolean handleSystemMsg(SystemMessage sysMsg) {
+
+		if (sysMsg.getMsgType() == SystemMessage.MsgType.USERNAME_TAKEN) {
+			_cg.onConnectionFailed("Username already taken.");
+			return false;
+		}
+		return true;
+	}
+
+	private void handleUserList(UserList list) {
+		ArrayList<String> alUsers = list.getUsers();
+		_cg.onUserListRecieved(alUsers);
 	}
 }
