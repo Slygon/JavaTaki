@@ -8,6 +8,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import taki.common.ChatMessage;
+import taki.common.ChatMessage.MsgType;
 
 /** One instance of this thread will run for each client */
 public class ClientThread extends Thread {
@@ -23,7 +24,13 @@ public class ClientThread extends Thread {
 	ChatMessage _cm;
 	// the date I connect
 	String _date;
-	Server _server;	
+	Server _server;		
+	
+	private boolean _isValid;
+	
+	public boolean getIsValid() {
+		return _isValid;
+	}
 
 	public String getUsername() {
 		return _username;
@@ -54,7 +61,12 @@ public class ClientThread extends Thread {
 			// read the username
 			_username = (String) _sInput.readObject();
 			
-			_server.onClientConnected(this);
+			if (!_server.checkIfNameExists(_username)) {
+				_isValid = true;
+				
+			} else {
+				_isValid = false;
+			}
 		}
 		catch (IOException e) {
 			_server.display("Exception creating new Input/output Streams: " + e);
@@ -118,7 +130,7 @@ public class ClientThread extends Thread {
 	}
 	
 	// try to close everything
-	private void close() {
+	public void close() {
 		// try to close the connection
 		try {
 			if(_sOutput != null) _sOutput.close();

@@ -40,7 +40,8 @@ public class ChatMessage implements Serializable {
 		WHOISIN,
 		MESSAGE,
 		LOGOUT,
-		CARD_CHOSEN
+		CARD_CHOSEN,
+		USERNAME_TAKEN
 	}
 
 	protected static final long serialVersionUID = 1112122200L;
@@ -57,6 +58,10 @@ public class ChatMessage implements Serializable {
 	private MsgType type;
 	private String message;
 	private CardType cardType;
+	
+	public MsgType getMsgType() {
+		return type;
+	}
 	
 	public CardType getCardType() {
 		return cardType;

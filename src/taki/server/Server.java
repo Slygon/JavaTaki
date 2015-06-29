@@ -10,6 +10,7 @@ import java.util.Date;
 
 import taki.common.ChatMessage;
 import taki.common.UserList;
+import taki.common.ChatMessage.MsgType;
 
 /*
  * The server that can be run both as a console application or a GUI
@@ -82,7 +83,14 @@ public class Server {
 				if(!_keepGoing)
 					break;
 				ClientThread t = new ClientThread(socket, this);  // make a thread of it
-				t.start();
+				
+				if (t.getIsValid()) {
+					t.start();
+					onClientConnected(t);
+				} else {
+					t.writeMsg(new ChatMessage(MsgType.USERNAME_TAKEN, "UsernameAlready Exists"));
+					t.close();
+				}
 			}
 			// I was asked to stop
 			try {
@@ -123,6 +131,17 @@ public class Server {
 			// nothing I can really do
 		}
 	}
+	
+	public boolean checkIfNameExists(String strName) {
+		for(ClientThread ct : _al) {
+			if (ct.getUsername().equals(strName)) {
+				return true;
+			}
+		}
+		
+		return false;
+	}
+	
 	/*
 	 * Display an event (not a message) to the console or the GUI
 	 */

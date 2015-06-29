@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
+import taki.common.ChatMessage;
+import taki.common.ChatMessage.MsgType;
 import taki.common.UserList;
 
 /*
@@ -28,8 +30,15 @@ public class ListenFromServerThread extends Thread {
 				if (msg instanceof UserList) {
 					ArrayList<String> alUsers = ((UserList) msg).getUsers();
 					_cg.onUserListRecieved(alUsers);
+				} else if (msg instanceof ChatMessage) {
+					ChatMessage chatMSG = (ChatMessage) msg;
+					
+					if (chatMSG.getMsgType() == MsgType.USERNAME_TAKEN) {
+						_cg.onConnectionFailed("Username already taken.");
+						break;
+					}
+					
 				} else if (msg instanceof String) {
-
 					// if console mode print the message and add back the prompt
 					if (_cg == null) {
 						System.out.println(msg);
