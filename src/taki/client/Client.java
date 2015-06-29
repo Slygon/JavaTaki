@@ -15,8 +15,8 @@ import taki.common.ChatMessage;
 public class Client {
 
 	// for I/O
-	private ObjectInputStream sInput;		// to read from the socket
-	private ObjectOutputStream sOutput;		// to write on the socket
+	private ObjectInputStream _sInput;		// to read from the socket
+	private ObjectOutputStream _sOutput;		// to write on the socket
 	private Socket socket;
 
 	// if I use a GUI or not
@@ -60,20 +60,20 @@ public class Client {
 		// if it failed not much I can so
 		catch(Exception ec) {
 //			display("Error connectiong to server:" + ec);
-			display("Could not connect to server " + server + " on port " + port);
+//			display("Could not connect to server " + server + " on port " + port);
 			_clientHandler.onConnectionFailed("Could not connect to server " + server + " on port " + port);
 			return false;
 		}
 		
-		_clientHandler.onConnected();
 		String msg = "Connection accepted " + socket.getInetAddress() + ":" + socket.getPort();
+		_clientHandler.onConnected(msg);
 		display(msg);
 	
 		/* Creating both Data Stream */
 		try
 		{
-			sInput  = new ObjectInputStream(socket.getInputStream());
-			sOutput = new ObjectOutputStream(socket.getOutputStream());
+			_sInput  = new ObjectInputStream(socket.getInputStream());
+			_sOutput = new ObjectOutputStream(socket.getOutputStream());
 		}
 		catch (IOException eIO) {
 			display("Exception creating new Input/output Streams: " + eIO);
@@ -81,12 +81,12 @@ public class Client {
 		}
 
 		// creates the Thread to listen from the server 
-		new ListenFromServerThread(_clientHandler, sInput).start();
+		new ListenFromServerThread(_clientHandler, _sInput).start();
 		// Send our username to the server this is the only message that we
 		// will send as a String. All other messages will be ChatMessage objects
 		try
 		{
-			sOutput.writeObject(username);
+			_sOutput.writeObject(username);
 		}
 		catch (IOException eIO) {
 			display("Exception doing login : " + eIO);
@@ -103,8 +103,8 @@ public class Client {
 	private void display(String msg) {
 		if(_clientHandler == null)
 			System.out.println(msg);      // println in console mode
-		else
-			_clientHandler.append(msg + "\n");		// append to the ClientGUI JTextArea (or whatever)
+//		else
+//			_clientHandler.append(msg + "\n");		// append to the ClientGUI JTextArea (or whatever)
 	}
 	
 	/*
@@ -112,7 +112,7 @@ public class Client {
 	 */
 	public void sendMessage(ChatMessage msg) {
 		try {
-			sOutput.writeObject(msg);
+			_sOutput.writeObject(msg);
 		}
 		catch(IOException e) {
 			display("Exception writing to server: " + e);
@@ -125,11 +125,11 @@ public class Client {
 	 */
 	public void disconnect() {
 		try { 
-			if(sInput != null) sInput.close();
+			if(_sInput != null) _sInput.close();
 		}
 		catch(Exception e) {} // not much else I can do
 		try {
-			if(sOutput != null) sOutput.close();
+			if(_sOutput != null) _sOutput.close();
 		}
 		catch(Exception e) {} // not much else I can do
         try{

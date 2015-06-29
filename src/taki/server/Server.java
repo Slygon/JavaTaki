@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 
 import taki.common.ChatMessage;
+import taki.common.UserList;
 
 /*
  * The server that can be run both as a console application or a GUI
@@ -81,7 +82,6 @@ public class Server {
 				if(!_keepGoing)
 					break;
 				ClientThread t = new ClientThread(socket, this);  // make a thread of it
-				_al.add(t);									// save it in the ArrayList
 				t.start();
 			}
 			// I was asked to stop
@@ -133,27 +133,31 @@ public class Server {
 		else
 			_sg.appendEvent(time + "\n");
 	}
+	
+	public void sendTextToAll(String message) {
+		// add HH:mm:ss and \n to the message
+				String time = _sdf.format(new Date());
+				String messageLf = time + " " + message + "\n";
+				// display message on console or GUI
+				if(_sg == null)
+					System.out.print(messageLf);
+				else
+					_sg.appendRoom(messageLf);     // append in the room window
+				
+			broadcast(message);
+	}
+	
 	/*
 	 *  to broadcast a message to all Clients
 	 */
-	public synchronized void broadcast(String message) {
-		// add HH:mm:ss and \n to the message
-		String time = _sdf.format(new Date());
-		String messageLf = time + " " + message + "\n";
-		// display message on console or GUI
-		if(_sg == null)
-			System.out.print(messageLf);
-		else
-			_sg.appendRoom(messageLf);     // append in the room window
-		
+	public synchronized void broadcast(Object msg) {
 		// we loop in reverse order in case we would have to remove a Client
 		// because it has disconnected
 		for(int i = _al.size(); --i >= 0;) {
 			ClientThread ct = _al.get(i);
 			// try to write to the Client if it fails remove it from the list
-			if(!ct.writeMsg(messageLf)) {
-				_al.remove(i);
-				display("Disconnected Client " + ct._username + " removed from list.");
+			if(!ct.writeMsg(msg)) {
+				onClientDisconnected(ct);
 			}
 		}
 	}
@@ -169,6 +173,26 @@ public class Server {
 				return;
 			}
 		}
+	}
+
+	public void onClientDisconnected(ClientThread ct) {
+		remove(ct.get_Id());
+		onClientshanged(ct);
+		display("Disconnected Client " + ct.getUsername() + " removed from list.");
+	}
+	
+	public void onClientConnected(ClientThread ct) { 
+		_al.add(ct);						// save it in the ArrayList
+		onClientshanged(ct);
+		display(ct.getName() + " just connected.");
+		
+	}
+	
+	public void onClientshanged(ClientThread ct) {
+		ArrayList<String> userList = new ArrayList<String>();
+		for (ClientThread clients : _al)
+			userList.add(clients.getUsername());
+		broadcast(new UserList(userList));
 	}
 
 }

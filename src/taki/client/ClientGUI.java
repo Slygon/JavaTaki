@@ -7,6 +7,7 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 
 import javax.swing.JButton;
 import javax.swing.JComboBox;
@@ -17,6 +18,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
+
+import org.eclipse.swt.widgets.Display;
 
 import taki.common.ChatMessage;
 import taki.common.ChatMessage.CardType;
@@ -237,6 +240,11 @@ public class ClientGUI extends JFrame implements ActionListener, ClientHandler {
 		}
 	}
 
-	public void onConnected() {
+	public void onConnected(String strText) {
+	}
+	
+	
+	public void onUserListRecieved(ArrayList<String> alUsers) {
+		
 	}
 }

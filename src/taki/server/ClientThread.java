@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Date;
 
 import taki.common.ChatMessage;
@@ -22,7 +23,19 @@ public class ClientThread extends Thread {
 	ChatMessage _cm;
 	// the date I connect
 	String _date;
-	Server _server;
+	Server _server;	
+
+	public String getUsername() {
+		return _username;
+	}
+
+	public int get_Id() {
+		return _nId;
+	}
+
+	public Socket getSocket() {
+		return _socket;
+	}
 
 	// Constructor
 	ClientThread(Socket socket, Server server) {
@@ -40,7 +53,8 @@ public class ClientThread extends Thread {
 			_sInput  = new ObjectInputStream(socket.getInputStream());
 			// read the username
 			_username = (String) _sInput.readObject();
-			_server.display(_username + " just connected.");
+			
+			_server.onClientConnected(this);
 		}
 		catch (IOException e) {
 			_server.display("Exception creating new Input/output Streams: " + e);
@@ -85,17 +99,21 @@ public class ClientThread extends Thread {
 				break;
 			case WHOISIN:
 				writeMsg("List of the users connected at " + _server.getDateFormat().format(new Date()) + "\n");
+				
+				ArrayList<String> alUsers = new ArrayList<String>();
+				
 				// scan al the users connected
 				for(int i = 0; i < _server.getClients().size(); ++i) {
 					ClientThread ct = _server.getClients().get(i);
-					writeMsg((i+1) + ") " + ct._username + " since " + ct._date);
+					alUsers.add(ct.getName());
 				}
+				writeMsg(alUsers);
 				break;
 			}
 		}
 		// remove myself from the arrayList containing the list of the
 		// connected Clients
-		_server.remove(_nId);
+		_server.onClientDisconnected(this);
 		close();
 	}
 	
@@ -115,11 +133,11 @@ public class ClientThread extends Thread {
 		}
 		catch (Exception e) {}
 	}
-
+	
 	/*
 	 * Write a String to the Client output stream
 	 */
-	public boolean writeMsg(String msg) {
+	public boolean writeMsg(Object msg) {
 		// if Client is still connected send the message to it
 		if(!_socket.isConnected()) {
 			close();
@@ -136,4 +154,4 @@ public class ClientThread extends Thread {
 		}
 		return true;
 	}
-}
+} 

@@ -1,5 +1,7 @@
 package taki.client;
 
+import java.util.ArrayList;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.PaintEvent;
 import org.eclipse.swt.events.PaintListener;
@@ -15,15 +17,18 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
+import sun.security.x509.IssuingDistributionPointExtension;
 import taki.common.ChatMessage;
 import taki.common.ChatMessage.MsgType;
 
@@ -41,11 +46,13 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 	Combo dogBreed;
 	Canvas dogPhoto;
 	Image dogImage;
-	List _cards;
+	List _users;
 	Text _txtMsgs;
 	Text _txtSendMsg;
 	Button _btnJoin;
 	Button _btnSend;
+	
+	private boolean _isDisposing = false;
 
 	private boolean _isConnected = false;
 	private Client _client;
@@ -69,7 +76,7 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 		initUsersWidget();
 
 		initChatWidget();
-
+		
 		updateControls(false);
 	}
 
@@ -84,15 +91,12 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 		_gridData.verticalSpan = 3;
 		userGroup.setLayoutData(_gridData);
 
-		_cards = new List(userGroup, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL);
-		_cards.setItems(new String[] { "Best of Breed", "Prettiest Female", "Handsomest Male", "Best Dressed",
-				"Fluffiest Ears", "Most Colors", "Best Performer", "Loudest Bark", "Best Behaved", "Prettiest Eyes",
-				"Most Hair", "Longest Tail", "Cutest Trick" });
+		_users = new List(userGroup, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL);
 		_gridData = new GridData(GridData.FILL, GridData.FILL, true, true);
 		// int listHeight = _cards.getItemHeight() * 12;
 		// Rectangle trim = _cards.computeTrim(0, 0, 0, listHeight);
 		// _gridData.heightHint = trim.height;
-		_cards.setLayoutData(_gridData);
+		_users.setLayoutData(_gridData);
 
 	}
 
@@ -232,6 +236,18 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 		// Center shell
 		_shell.setLocation(findMonitorCenter());
 
+		// /*_shell.addListener(SWT.Close, new Listener() {
+		// public void handleEvent(Event event) {
+		// Display.getCurrent().asyncExec(new Runnable() {
+		//
+		// @Override
+		// public void run() {
+		//
+		// }
+		// });
+		// }
+		// });*/
+
 		initWidgets();
 	}
 
@@ -243,6 +259,8 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 			if (!_display.readAndDispatch())
 				_display.sleep();
 		}
+		_isDisposing = true;
+		_client.disconnect();
 		_display.dispose();
 	}
 
@@ -255,8 +273,17 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 
 		if (isConnected) {
 			_btnJoin.setText("Disconnect");
+
+			_txtSendMsg.setFocus();
+			_shell.setDefaultButton(_btnSend);
+			
 		} else {
 			_btnJoin.setText("Join");
+			_users.removeAll();
+			
+			_txtUsername.setFocus();
+			_txtUsername.selectAll();
+			_shell.setDefaultButton(_btnJoin);
 		}
 
 		// // disable login button
@@ -307,49 +334,25 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 
 			@Override
 			public void run() {
-				_txtMsgs.append(strText);
-			}
-		});
-	}
-
-	public void onConnectionFailed(String strMsg) {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				updateControls(false);
-
-				// MessageBox msg = new MessageBox(_shell, SWT.ERROR | SWT.OK);
-				// msg.setMessage(strMsg);
-				// msg.setText("Connection failed");
-				// msg.open();
-			}
-		});
-	}
-
-	public void onConnected() {
-		Display.getDefault().asyncExec(new Runnable() {
-
-			@Override
-			public void run() {
-				updateControls(true);
+				_txtMsgs.append(strText + "\n");
+				_txtSendMsg.setFocus();
 			}
 		});
 	}
 
 	public void widgetSelected(SelectionEvent e) {
 		if (e.widget == _btnJoin) {
-			if ( !_isConnected) {
-			_client = new Client(_txtServer.getText(), Integer.parseInt(_txtPort.getText()), _txtUsername.getText(),
-					this);
-			// test if we can start the Client
-			if (!_client.start())
-				return; 
+			if (!_isConnected) {
+				_client = new Client(_txtServer.getText(), Integer.parseInt(_txtPort.getText()), _txtUsername.getText(),
+						this);
+				// test if we can start the Client
+				if (!_client.start())
+					return;
 			} else {
 				_client.sendMessage(new ChatMessage(MsgType.LOGOUT, ""));
 				return;
 			}
-			
+
 		} else if (e.widget == _btnSend && _isConnected) {
 			_client.sendMessage(new ChatMessage(MsgType.MESSAGE, _txtSendMsg.getText()));
 			_txtSendMsg.setText("");
@@ -360,5 +363,48 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 	public void widgetDefaultSelected(SelectionEvent e) {
 		// TODO Auto-generated method stub
 
+	}
+	
+	public void onConnectionFailed(String strMsg) {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				if (!_isDisposing) {
+					updateControls(false);
+					_txtMsgs.append(strMsg + "\n");
+
+					// MessageBox msg = new MessageBox(_shell, SWT.ERROR |
+					// SWT.OK);
+					// msg.setMessage(strMsg);
+					// msg.setText("Connection failed");
+					// msg.open();
+
+				}
+			}
+		});
+	}
+
+	public void onConnected(String strMsg) {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				updateControls(true);
+				_txtMsgs.append(strMsg + "\n");
+			}
+		});
+	}
+
+	@Override
+	public void onUserListRecieved(ArrayList<String> alUsers) {
+		Display.getDefault().asyncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				String[] strUsers = new String[alUsers.size()];
+				_users.setItems(alUsers.toArray(strUsers));
+			}
+		});
 	}
 }
