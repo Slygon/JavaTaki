@@ -8,6 +8,7 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Cursor;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
@@ -18,19 +19,18 @@ import org.eclipse.swt.widgets.Canvas;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-import sun.security.x509.IssuingDistributionPointExtension;
 import taki.common.ChatMessage;
 import taki.common.ChatMessage.MsgType;
+import taki.common.GameMessage;
+import taki.common.GameMessage.CardType;
 
 public class newClientGUI implements ClientHandler, SelectionListener {
 	private String _strServer;
@@ -43,8 +43,8 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 	Text _txtServer;
 	Text _txtPort;
 	Text _txtUsername;
-	Combo dogBreed;
-	Canvas dogPhoto;
+	Combo _card;
+	Canvas _gameBoard;
 	Image dogImage;
 	List _users;
 	Text _txtMsgs;
@@ -101,24 +101,23 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 	}
 
 	private void initGameWidget() {
-		GridLayout gridLayout = new GridLayout();
-		Group photoGroup = new Group(_shell, SWT.NONE);
-		photoGroup.setText("Game");
-		gridLayout.numColumns = 2;
-		photoGroup.setLayout(gridLayout);
+		GridLayout gridLayout = new GridLayout(2, true);
+		Group gameGroup = new Group(_shell, SWT.NONE);
+		gameGroup.setText("Game");
+		gameGroup.setLayout(gridLayout);
 		_gridData = new GridData(GridData.FILL, GridData.FILL, true, true);
 		_gridData.horizontalSpan = 2;
 		_gridData.verticalSpan = 3;
-		photoGroup.setLayoutData(_gridData);
+		gameGroup.setLayoutData(_gridData);
 
-		dogPhoto = new Canvas(photoGroup, SWT.BORDER);
+		_gameBoard = new Canvas(gameGroup, SWT.BORDER);
 		_gridData = new GridData(GridData.FILL, GridData.FILL, true, true);
 		_gridData.minimumHeight = 200;
 		// _gridData.widthHint = 80;
 		// _gridData.heightHint = 80;
 		_gridData.horizontalSpan = 2;
-		dogPhoto.setLayoutData(_gridData);
-		dogPhoto.addPaintListener(new PaintListener() {
+		_gameBoard.setLayoutData(_gridData);
+		_gameBoard.addPaintListener(new PaintListener() {
 			public void paintControl(final PaintEvent event) {
 				if (dogImage != null) {
 					event.gc.drawImage(dogImage, 0, 0);
@@ -126,34 +125,45 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 			}
 		});
 
-		Button browse = new Button(photoGroup, SWT.PUSH);
-		browse.setText("Browse...");
+		_card = new Combo(gameGroup, SWT.PUSH);
+		
+		CardType[] cardTypes = GameMessage.CardType.values();
+		String[] cardNames = new String[cardTypes.length];
+		
+		for (int i = 0; i < cardTypes.length; i++) {
+		    cardNames[i] = cardTypes[i].name();
+		}
+		_card.setItems(cardNames);
+		
+//		Button browse = new Button(photoGroup, SWT.PUSH);
+//		browse.setText("Browse...");
 		_gridData = new GridData(GridData.FILL, GridData.CENTER, true, false);
 		// _gridData.horizontalIndent = 5;
-		browse.setLayoutData(_gridData);
-		browse.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent event) {
-				String fileName = new FileDialog(_shell).open();
-				if (fileName != null) {
-					dogImage = new Image(_display, fileName);
-				}
-			}
-		});
+//		browse.setLayoutData(_gridData);
+//		browse.addSelectionListener(new SelectionAdapter() {
+//			public void widgetSelected(SelectionEvent event) {
+//				String fileName = new FileDialog(_shell).open();
+//				if (fileName != null) {
+//					dogImage = new Image(_display, fileName);
+//				}
+//			}
+//		});
 
-		Button delete = new Button(photoGroup, SWT.PUSH);
-		delete.setText("Delete");
+		Button choose = new Button(gameGroup, SWT.PUSH);
+		choose.setText("Choose");
 		_gridData = new GridData(GridData.FILL, GridData.BEGINNING, true, false);
 		_gridData.horizontalIndent = 5;
-		delete.setLayoutData(_gridData);
-		delete.addSelectionListener(new SelectionAdapter() {
+		choose.setLayoutData(_gridData);
+		choose.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
 				if (dogImage != null) {
 					dogImage.dispose();
 					dogImage = null;
-					dogPhoto.redraw();
+					_gameBoard.redraw();
 				}
 			}
 		});
+		drawDeck();
 	}
 
 	private void initLoginWidget() {
@@ -222,9 +232,8 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 		new Label(ownerInfo, SWT.NONE).setText("Send:");
 		_txtSendMsg = new Text(ownerInfo, SWT.SINGLE | SWT.BORDER);
 		_txtSendMsg.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
-
 	}
-
+	
 	private void initShell() {
 
 		// Define shell
@@ -260,10 +269,46 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 				_display.sleep();
 		}
 		_isDisposing = true;
-		_client.disconnect();
+		if (_client != null)
+			_client.disconnect();
 		_display.dispose();
 	}
 
+	private void drawDeck() {
+		Image image = new Image(_display, "./images/new-deck-small.jpg");
+		Cursor handCursor = new Cursor(_display, SWT.CURSOR_HAND);
+		Cursor arrowCursor = new Cursor(_display, SWT.CURSOR_ARROW);
+		
+		_gameBoard.addPaintListener(new PaintListener() {
+		  public void paintControl(PaintEvent e) {
+		    e.gc.drawImage(image, 0, 0);
+		  }
+		});
+		
+		_gameBoard.addListener(SWT.MouseMove, new Listener() {
+			
+			@Override
+			public void handleEvent(Event e) {
+				Point pnt = new Point(e.x, e.y);
+				if (image.getBounds().contains(pnt)) {
+				 _shell.setCursor(handCursor);
+				} else {
+					_shell.setCursor(arrowCursor);
+				}
+			}
+		});
+		
+		_gameBoard.addListener(SWT.MouseDown, new Listener() {
+			
+			@Override
+			public void handleEvent(Event e) {
+				if (image.getBounds().contains(new Point(e.x, e.y))) {
+					System.out.println("CLICKED!");
+				}
+			}
+		});
+	}
+	
 	private void updateControls(boolean isConnected) {
 		_isConnected = isConnected;
 
