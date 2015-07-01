@@ -14,6 +14,7 @@ public class GameLogic {
 
 	final private int DEFAULT_NUM_DECKS = 2;
 	final private int DECK_SIZE = 56;
+	final private int INITIAL_HAND_SIZE = 8;
 
 	private ArrayList<GameCard> _deck;
 	private HashMap<String, ArrayList<GameCard>> _players;
@@ -24,7 +25,8 @@ public class GameLogic {
 	}
 
 	public void setPlayers(String[] players) {
-		_players.clear();
+		_players = new HashMap<String, ArrayList<GameCard>>();
+		
 		for (String player : players) {
 			_players.put(player, new ArrayList<>());
 		}
@@ -40,10 +42,27 @@ public class GameLogic {
 		shuffleCards();
 	}
 
+	public void startGame() {
+		handCardsToPlayers();
+	}
+	
+	private void handCardsToPlayers() {
+		if (_players != null) {
+			String[] playerNames = new String[_players.size()];
+			playerNames = _players.keySet().toArray(playerNames);
+			for (String player : playerNames) {
+				for (int i = 0; i < INITIAL_HAND_SIZE; i++) {
+					_players.get(player).add(_deck.get(0));
+					_deck.remove(0);
+				}
+			}
+		}
+	}
+	
 	private void shuffleCards() {
 		Collections.shuffle(_deck);
 	}
-
+	
 	private GameCard[] generateDeck(int nDecks) {
 		GameCard[] deck = new GameCard[DECK_SIZE * nDecks];
 		CardType[] cardTypes = CardType.values();
