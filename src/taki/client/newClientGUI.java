@@ -29,8 +29,7 @@ import org.eclipse.swt.widgets.Text;
 
 import taki.common.ChatMessage;
 import taki.common.ChatMessage.MsgType;
-import taki.common.GameMessage;
-import taki.common.GameMessage.CardType;
+import taki.common.GameCard;
 
 public class newClientGUI implements ClientHandler, SelectionListener {
 	private String _strServer;
@@ -127,7 +126,7 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 
 		_card = new Combo(gameGroup, SWT.PUSH);
 		
-		CardType[] cardTypes = GameMessage.CardType.values();
+		GameCard.CardType[] cardTypes = GameCard.CardType.values();
 		String[] cardNames = new String[cardTypes.length];
 		
 		for (int i = 0; i < cardTypes.length; i++) {
