@@ -1,8 +1,6 @@
 package test;
 
 import java.util.ArrayList;
-import java.util.Map.Entry;
-import java.util.Set;
 
 import org.junit.Test;
 
@@ -22,12 +20,13 @@ public class GameCardTest {
 		GameLogic logic = new GameLogic();
 		String[] players = new String[] {"Tal", "Moshe", "Itzik", "Shalom", "David", "Gal", "Chen",
 										 "Nir", "Assaf", "Matan", "Lior", "Maor", "Omri", "Itai"};
-		logic.setPlayers(players);
+		logic.getGameState().setPlayers(players);
 		logic.startGame();
 		
 		for(String player : players) {
 			System.out.println(player);
-			for(GameCard card : logic.getPlayers().get(player)) {
+			logic.playerJoined(player);
+			for(GameCard card : logic.getGameState().getPlayers().get(player)) {
 				System.out.println("\t" + card);
 			}
 		}	
@@ -36,8 +35,9 @@ public class GameCardTest {
 	}
 	
 	private void printDeck(GameLogic logic) {
-		ArrayList<GameCard> deck = logic.getDeck();
+		ArrayList<GameCard> deck = logic.getGameState().getGameDeck();
 		
+		System.out.println("Deck\n");
 		for(GameCard card : deck) {
 			System.out.println(card);
 		}

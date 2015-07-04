@@ -6,62 +6,53 @@ import java.util.HashMap;
 public class GameCard implements Serializable {
 
 	private static final long serialVersionUID = 2284472941729695106L;
-	
+
 	public enum CardType {
-		ONE,
-		TWO,
-		THREE,
-		FOUR,
-		FIVE,
-		SIX,
-		SEVEN,
-		EIGHT,
-		NINE,
-		TEN,
-		STOP,
-		PLUS_TWO,
-		TAKI,
-		SWITCH_DIRECTION,
-		SUPER_TAKI,
-		CHANGE_COLOR
+		ONE, TWO, THREE, FOUR, FIVE, SIX, SEVEN, EIGHT, NINE, TEN, STOP, PLUS_TWO, TAKI, SWITCH_DIRECTION, SUPER_TAKI, CHANGE_COLOR
 	}
-	
+
 	public enum CardColor {
-		BLUE,
-		GREEN,
-		YELLOW,
-		RED,
-		SPECIAL
+		BLUE, GREEN, YELLOW, RED, SPECIAL
 	}
-	
+
 	public GameCard(CardType type, CardColor color) {
 		setCardType(type);
 		setCardColor(color);
-		
+
 		setEnumMap();
 	}
-	
+
 	private static HashMap<String, String> _enumMap;
-	
+
 	private CardType _cardType;
+
 	public CardType getCardType() {
 		return _cardType;
 	}
+
 	public void setCardType(CardType cardType) {
 		_cardType = cardType;
 	}
 
 	private CardColor _cardColor;
+
 	public CardColor getCardColor() {
 		return _cardColor;
 	}
+
 	public void setCardColor(CardColor color) {
 		_cardColor = color;
 	}
-	
+
+	public boolean isCardSpecial() {
+		return (_cardType == CardType.CHANGE_COLOR || _cardType == _cardType.SWITCH_DIRECTION
+				|| _cardType == _cardType.TAKI || _cardType == _cardType.SUPER_TAKI || _cardType == _cardType.STOP
+				|| _cardType == _cardType.PLUS_TWO);
+	}
+
 	private static void setEnumMap() {
 		_enumMap = new HashMap<>();
-		
+
 		_enumMap.put(CardType.ONE.name(), "1");
 		_enumMap.put(CardType.TWO.name(), "2");
 		_enumMap.put(CardType.THREE.name(), "3");
@@ -78,20 +69,30 @@ public class GameCard implements Serializable {
 		_enumMap.put(CardType.SWITCH_DIRECTION.name(), "Switch Direction");
 		_enumMap.put(CardType.CHANGE_COLOR.name(), "Change Color");
 		_enumMap.put(CardType.SUPER_TAKI.name(), "Super Taki");
-		
+
 		_enumMap.put(CardColor.BLUE.name(), "Blue");
 		_enumMap.put(CardColor.GREEN.name(), "Green");
 		_enumMap.put(CardColor.RED.name(), "Red");
 		_enumMap.put(CardColor.YELLOW.name(), "Yellow");
 		_enumMap.put(CardColor.SPECIAL.name(), "Special");
 	}
-	
+
+	public int toInt() {
+		int i = -1;
+		if (!isCardSpecial()) {
+			try {
+				i = Integer.parseInt(_enumMap.get(_cardType.name()));
+			} catch (NumberFormatException e) {
+				System.out.println("Error in getting card as a number!");
+			}
+		}
+		return i;
+	}
+
 	public String toString() {
-		
-		String strCardName = 
-				_enumMap.get(_cardType.name()) + " (" +
-				_enumMap.get(_cardColor.name()) + ")";
-		
+
+		String strCardName = _enumMap.get(_cardType.name()) + " (" + _enumMap.get(_cardColor.name()) + ")";
+
 		return strCardName;
 	}
 }

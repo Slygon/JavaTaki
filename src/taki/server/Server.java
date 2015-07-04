@@ -26,6 +26,8 @@ public class Server {
 	// the boolean that will be turned of to stop the server
 	private boolean _keepGoing;
 	
+	private GameLogic _gameLogic;
+	
 	public static int getUniqueIdPlusOne() {
 		return ++_uniqueId;
 	}
@@ -59,6 +61,8 @@ public class Server {
 		_sdf = new SimpleDateFormat("HH:mm:ss");
 		// ArrayList for the Client list
 		_al = new ArrayList<ClientThread>();
+		
+		_gameLogic = new GameLogic();
 	}
 	
 	public void start() {
