@@ -95,4 +95,18 @@ public class GameCard implements Serializable {
 
 		return strCardName;
 	}
+
+	@Override
+	public boolean equals(Object obj) {
+
+		if (obj instanceof GameCard) {
+			GameCard card = (GameCard) obj;
+			return card.getCardColor() == this.getCardColor() &&
+					card.getCardType() == this.getCardType();
+		} else {
+			return false;
+		}
+	}
+	
+	
 }

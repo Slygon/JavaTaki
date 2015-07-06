@@ -418,7 +418,7 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 		} else if (e.widget == _btnChoose && _isConnected && _gameState != null) {
 
 			ArrayList<GameCard> playerCards = _gameState.getPlayers().get(_client.getUsername());
-			GameMessage msg = new GameMessage(ClientAction.CHOSE_CARD, playerCards.get(_card.getSelectionIndex()));
+			GameMessage msg = new GameMessage(_client.getUsername(), ClientAction.CHOSE_CARD, playerCards.get(_card.getSelectionIndex()));
 
 			_client.sendMessage(msg);
 
