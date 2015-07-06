@@ -7,10 +7,8 @@ import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 
 import javax.swing.JButton;
-import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -19,11 +17,10 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 
-import org.eclipse.swt.widgets.Display;
-
 import taki.common.ChatMessage;
 //import taki.common.ChatMessage.CardType;
 import taki.common.ChatMessage.MsgType;
+import taki.common.GameMessage;
 
 /*
  * The Client with its GUI
@@ -244,7 +241,7 @@ public class ClientGUI extends JFrame implements ActionListener, ClientHandler {
 	}
 	
 	
-	public void onUserListRecieved(ArrayList<String> alUsers) {
+	public void onGameStateRecieved(GameMessage gameMsg) {
 		
 	}
 }

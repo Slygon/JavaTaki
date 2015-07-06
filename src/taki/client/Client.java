@@ -25,6 +25,10 @@ public class Client {
 	// the server, the port and the username
 	private String server, username;
 	private int port;
+	
+	public String getUsername() {
+		return username;
+	}
 
 	/*
 	 *  Constructor called by console mode
@@ -110,7 +114,7 @@ public class Client {
 	/*
 	 * To send a message to the server
 	 */
-	public void sendMessage(ChatMessage msg) {
+	public void sendMessage(Object msg) {
 		try {
 			_sOutput.writeObject(msg);
 		}

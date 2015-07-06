@@ -22,7 +22,7 @@ public class GameCard implements Serializable {
 		setEnumMap();
 	}
 
-	private static HashMap<String, String> _enumMap;
+	private HashMap<String, String> _enumMap;
 
 	private CardType _cardType;
 
@@ -50,7 +50,7 @@ public class GameCard implements Serializable {
 				|| _cardType == _cardType.PLUS_TWO);
 	}
 
-	private static void setEnumMap() {
+	private void setEnumMap() {
 		_enumMap = new HashMap<>();
 
 		_enumMap.put(CardType.ONE.name(), "1");

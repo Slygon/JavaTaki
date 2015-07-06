@@ -55,6 +55,16 @@ public class GameLogic {
 		handCardsToPlayer(playerName);
 	}
 
+	public void playerLeft(String playerName) {
+		if (_gameState.getCurrPlayer() != null &&
+			_gameState.getCurrPlayer().equals(playerName)) {
+			switchTurn();
+		}
+		ArrayList<GameCard> userCards = _gameState.getPlayers().get(playerName);
+		_gameState.getPlayers().remove(playerName);
+		_gameState.getGameDeck().addAll(userCards);
+	}
+	
 	public boolean playerChoseCard(String playerName, GameCard card) {
 		boolean bIsValid = true;
 		int nTurnsToSkip = 0;

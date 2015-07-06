@@ -29,7 +29,10 @@ import org.eclipse.swt.widgets.Text;
 
 import taki.common.ChatMessage;
 import taki.common.ChatMessage.MsgType;
+import taki.common.GameMessage.ClientAction;
 import taki.common.GameCard;
+import taki.common.GameMessage;
+import taki.common.GameState;
 
 public class newClientGUI implements ClientHandler, SelectionListener {
 	private String _strServer;
@@ -50,11 +53,14 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 	Text _txtSendMsg;
 	Button _btnJoin;
 	Button _btnSend;
-	
+
+	GameState _gameState;
+
 	private boolean _isDisposing = false;
 
 	private boolean _isConnected = false;
 	private Client _client;
+	private Button _btnChoose;
 
 	public newClientGUI(String host, int port) {
 		_strServer = host;
@@ -75,7 +81,7 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 		initUsersWidget();
 
 		initChatWidget();
-		
+
 		updateControls(false);
 	}
 
@@ -125,43 +131,44 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 		});
 
 		_card = new Combo(gameGroup, SWT.PUSH);
-		
-		GameCard.CardType[] cardTypes = GameCard.CardType.values();
-		String[] cardNames = new String[cardTypes.length];
-		
-		for (int i = 0; i < cardTypes.length; i++) {
-		    cardNames[i] = cardTypes[i].name();
-		}
-		_card.setItems(cardNames);
-		
-//		Button browse = new Button(photoGroup, SWT.PUSH);
-//		browse.setText("Browse...");
+
+		// GameCard.CardType[] cardTypes = GameCard.CardType.values();
+		// String[] cardNames = new String[cardTypes.length];
+		//
+		// for (int i = 0; i < cardTypes.length; i++) {
+		// cardNames[i] = cardTypes[i].name();
+		// }
+		// _card.setItems(cardNames);
+
+		// Button browse = new Button(photoGroup, SWT.PUSH);
+		// browse.setText("Browse...");
 		_gridData = new GridData(GridData.FILL, GridData.CENTER, true, false);
 		// _gridData.horizontalIndent = 5;
-//		browse.setLayoutData(_gridData);
-//		browse.addSelectionListener(new SelectionAdapter() {
-//			public void widgetSelected(SelectionEvent event) {
-//				String fileName = new FileDialog(_shell).open();
-//				if (fileName != null) {
-//					dogImage = new Image(_display, fileName);
-//				}
-//			}
-//		});
+		// browse.setLayoutData(_gridData);
+		// browse.addSelectionListener(new SelectionAdapter() {
+		// public void widgetSelected(SelectionEvent event) {
+		// String fileName = new FileDialog(_shell).open();
+		// if (fileName != null) {
+		// dogImage = new Image(_display, fileName);
+		// }
+		// }
+		// });
 
-		Button choose = new Button(gameGroup, SWT.PUSH);
-		choose.setText("Choose");
+		_btnChoose = new Button(gameGroup, SWT.PUSH);
+		_btnChoose.setText("Choose");
 		_gridData = new GridData(GridData.FILL, GridData.BEGINNING, true, false);
 		_gridData.horizontalIndent = 5;
-		choose.setLayoutData(_gridData);
-		choose.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent event) {
-				if (dogImage != null) {
-					dogImage.dispose();
-					dogImage = null;
-					_gameBoard.redraw();
-				}
-			}
-		});
+		_btnChoose.setLayoutData(_gridData);
+		_btnChoose.addSelectionListener(this);
+		// choose.addSelectionListener(new SelectionAdapter() {
+		// public void widgetSelected(SelectionEvent event) {
+		// if (dogImage != null) {
+		// dogImage.dispose();
+		// dogImage = null;
+		// _gameBoard.redraw();
+		// }
+		// }
+		// });
 		drawDeck();
 	}
 
@@ -232,7 +239,7 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 		_txtSendMsg = new Text(ownerInfo, SWT.SINGLE | SWT.BORDER);
 		_txtSendMsg.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
 	}
-	
+
 	private void initShell() {
 
 		// Define shell
@@ -277,37 +284,44 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 		Image image = new Image(_display, "./images/new-deck-small.jpg");
 		Cursor handCursor = new Cursor(_display, SWT.CURSOR_HAND);
 		Cursor arrowCursor = new Cursor(_display, SWT.CURSOR_ARROW);
-		
+
 		_gameBoard.addPaintListener(new PaintListener() {
-		  public void paintControl(PaintEvent e) {
-		    e.gc.drawImage(image, 0, 0);
-		  }
+			public void paintControl(PaintEvent e) {
+				e.gc.drawImage(image, 0, 0);
+			}
 		});
-		
+
 		_gameBoard.addListener(SWT.MouseMove, new Listener() {
-			
+
 			@Override
 			public void handleEvent(Event e) {
 				Point pnt = new Point(e.x, e.y);
 				if (image.getBounds().contains(pnt)) {
-				 _shell.setCursor(handCursor);
+					_shell.setCursor(handCursor);
 				} else {
 					_shell.setCursor(arrowCursor);
 				}
 			}
 		});
-		
+
 		_gameBoard.addListener(SWT.MouseDown, new Listener() {
-			
+
 			@Override
 			public void handleEvent(Event e) {
 				if (image.getBounds().contains(new Point(e.x, e.y))) {
 					System.out.println("CLICKED!");
+					
+					if (_isConnected) {
+						GameMessage msg = new GameMessage(ClientAction.TAKE_CARD_FROM_DECK);
+						msg.setPlayerName(_client.getUsername());
+						_client.sendMessage(msg);
+					}
+						
 				}
 			}
 		});
 	}
-	
+
 	private void updateControls(boolean isConnected) {
 		_isConnected = isConnected;
 
@@ -320,11 +334,11 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 
 			_txtSendMsg.setFocus();
 			_shell.setDefaultButton(_btnSend);
-			
+
 		} else {
 			_btnJoin.setText("Join");
 			_users.removeAll();
-			
+
 			_txtUsername.setFocus();
 			_txtUsername.selectAll();
 			_shell.setDefaultButton(_btnJoin);
@@ -401,6 +415,13 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 			_client.sendMessage(new ChatMessage(MsgType.MESSAGE, _txtSendMsg.getText()));
 			_txtSendMsg.setText("");
 			return;
+		} else if (e.widget == _btnChoose && _isConnected && _gameState != null) {
+
+			ArrayList<GameCard> playerCards = _gameState.getPlayers().get(_client.getUsername());
+			GameMessage msg = new GameMessage(ClientAction.CHOSE_CARD, playerCards.get(_card.getSelectionIndex()));
+
+			_client.sendMessage(msg);
+
 		}
 	}
 
@@ -408,7 +429,7 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 		// TODO Auto-generated method stub
 
 	}
-	
+
 	public void onConnectionFailed(String strMsg) {
 		Display.getDefault().asyncExec(new Runnable() {
 
@@ -441,13 +462,23 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 	}
 
 	@Override
-	public void onUserListRecieved(ArrayList<String> alUsers) {
+	public void onGameStateRecieved(GameMessage gameMsg) {
+		ArrayList<String> alUsers = new ArrayList<String>(gameMsg.getGameState().getPlayers().keySet());
+		_gameState = gameMsg.getGameState();
+
 		Display.getDefault().asyncExec(new Runnable() {
 
 			@Override
 			public void run() {
 				String[] strUsers = new String[alUsers.size()];
 				_users.setItems(alUsers.toArray(strUsers));
+
+				ArrayList<GameCard> playerCards = gameMsg.getGameState().getPlayers().get(_client.getUsername());
+				String[] arrCards = new String[playerCards.size()];
+				for (int i = 0; i < playerCards.size(); i++) {
+					arrCards[i] = playerCards.get(i).toString();
+				}
+				_card.setItems(arrCards);
 			}
 		});
 	}

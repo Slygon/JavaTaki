@@ -6,6 +6,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import taki.common.CardList;
+import taki.common.GameMessage;
 import taki.common.SystemMessage;
 import taki.common.UserList;
 
@@ -28,6 +30,10 @@ public class Server {
 	
 	private GameLogic _gameLogic;
 	
+	public GameLogic getGameLogic() {
+		return _gameLogic;
+	}
+
 	public static int getUniqueIdPlusOne() {
 		return ++_uniqueId;
 	}
@@ -197,22 +203,29 @@ public class Server {
 
 	public void onClientDisconnected(ClientThread ct) {
 		remove(ct.get_Id());
+		_gameLogic.playerLeft(ct.getUsername());
 		onClientshanged(ct);
 		display("Disconnected Client " + ct.getUsername() + " removed from list.");
 	}
 	
 	public void onClientConnected(ClientThread ct) { 
 		_al.add(ct);						// save it in the ArrayList
+		_gameLogic.playerJoined(ct.getUsername());
 		onClientshanged(ct);
-		display(ct.getName() + " just connected.");
-		
+		display(ct.getUsername() + " just connected.");
 	}
 	
 	public void onClientshanged(ClientThread ct) {
 		ArrayList<String> userList = new ArrayList<String>();
 		for (ClientThread clients : _al)
 			userList.add(clients.getUsername());
-		broadcast(new UserList(userList));
+		
+//		GameMessage msg = new GameMessage(new UserList(userList));
+//		msg.setCard(_gameLogic.getGameState().getLastCard());
+//		msg.setPlayerName(_gameLogic.getGameState().getCurrPlayer());
+//		msg.setCards(new CardList(_gameLogic.getGameState().getPlayers().get(ct.getUsername())));
+		
+		broadcast(new GameMessage(_gameLogic.getGameState()));
 	}
 
 }

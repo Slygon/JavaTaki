@@ -5,6 +5,7 @@ import java.io.ObjectInputStream;
 import java.util.ArrayList;
 
 import taki.common.ChatMessage;
+import taki.common.GameMessage;
 import taki.common.ChatMessage.MsgType;
 import taki.common.SystemMessage;
 import taki.common.UserList;
@@ -28,8 +29,8 @@ public class ListenFromServerThread extends Thread {
 			try {
 				Object msg = _sInput.readObject();
 
-				if (msg instanceof UserList) {
-					handleUserList(((UserList) msg));
+				if (msg instanceof GameMessage) {
+					handleGameMsg(((GameMessage) msg));
 				} else if (msg instanceof ChatMessage) {
 					ChatMessage chatMSG = (ChatMessage) msg;
 					handleChatMessage((ChatMessage)chatMSG);
@@ -79,8 +80,7 @@ public class ListenFromServerThread extends Thread {
 		return true;
 	}
 
-	private void handleUserList(UserList list) {
-		ArrayList<String> alUsers = list.getUsers();
-		_cg.onUserListRecieved(alUsers);
+	private void handleGameMsg(GameMessage gameMsg) {
+		_cg.onGameStateRecieved(gameMsg);
 	}
 }

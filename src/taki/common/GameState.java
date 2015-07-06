@@ -1,12 +1,15 @@
 package taki.common;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Set;
 
-public class GameState {
+public class GameState implements Serializable {
 
+	private static final long serialVersionUID = -894906014556362213L;
+	
 	boolean _isDirectionOpposite = false;
 	private ArrayList<GameCard> _gameDeck;
 	private ArrayList<GameCard> _lastMoves;
