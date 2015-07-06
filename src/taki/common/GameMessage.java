@@ -8,9 +8,19 @@ public class GameMessage implements Serializable {
 	
 	public enum ClientAction {
 		CHOSE_CARD,
-		TAKE_CARD_FROM_DECK
+		TAKE_CARD_FROM_DECK,
+		SERVER_MESSAGE
 	}
 	
+	private String _serverMsg = "";
+	
+	public String getServerMsg() {
+		return _serverMsg;
+	}
+	public void setServerMsg(String serverMsg) {
+		_serverMsg = serverMsg;
+	}
+
 	private GameState _gameState;
 	
 	private String _playerName;
@@ -56,6 +66,10 @@ public class GameMessage implements Serializable {
 	public GameMessage(ClientAction action, GameCard card) {
 		_action = action;
 		_card = card;
+	}
+	
+	public GameMessage(String serverMsg) {
+		_serverMsg = serverMsg;
 	}
 	
 	public GameMessage(String playerName, ClientAction action, GameCard card) {

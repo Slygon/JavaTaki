@@ -82,5 +82,10 @@ public class ListenFromServerThread extends Thread {
 
 	private void handleGameMsg(GameMessage gameMsg) {
 		_cg.onGameStateRecieved(gameMsg);
+		
+		String strMsg = gameMsg.getServerMsg();
+		if (!strMsg.equals("")) {
+			printMsg("[Game] " + strMsg);
+		}
 	}
 }

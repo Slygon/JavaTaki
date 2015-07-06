@@ -5,16 +5,19 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Observable;
+import java.util.Observer;
 
 import taki.common.CardList;
 import taki.common.GameMessage;
+import taki.common.GameMessage.ClientAction;
 import taki.common.SystemMessage;
 import taki.common.UserList;
 
 /*
  * The server that can be run both as a console application or a GUI
  */
-public class Server {
+public class Server implements Observer {
 	// a unique ID for each connection
 	private static int _uniqueId;
 	// an ArrayList to keep the list of the Client
@@ -69,6 +72,7 @@ public class Server {
 		_al = new ArrayList<ClientThread>();
 		
 		_gameLogic = new GameLogic();
+		_gameLogic.setObserver(this);
 	}
 	
 	public void start() {
@@ -226,6 +230,13 @@ public class Server {
 //		msg.setCards(new CardList(_gameLogic.getGameState().getPlayers().get(ct.getUsername())));
 		
 		broadcast(new GameMessage(_gameLogic.getGameState()));
+	}
+
+	@Override
+	public void update(Observable o, Object arg) {
+		String strMsg = (String)arg;
+		display(strMsg);
+		broadcast(new GameMessage(strMsg));
 	}
 
 }

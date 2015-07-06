@@ -61,6 +61,7 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 	private boolean _isConnected = false;
 	private Client _client;
 	private Button _btnChoose;
+	private Group _gameGroup;
 
 	public newClientGUI(String host, int port) {
 		_strServer = host;
@@ -107,15 +108,15 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 
 	private void initGameWidget() {
 		GridLayout gridLayout = new GridLayout(2, true);
-		Group gameGroup = new Group(_shell, SWT.NONE);
-		gameGroup.setText("Game");
-		gameGroup.setLayout(gridLayout);
+		_gameGroup = new Group(_shell, SWT.NONE);
+		_gameGroup.setText("Game");
+		_gameGroup.setLayout(gridLayout);
 		_gridData = new GridData(GridData.FILL, GridData.FILL, true, true);
 		_gridData.horizontalSpan = 2;
 		_gridData.verticalSpan = 3;
-		gameGroup.setLayoutData(_gridData);
+		_gameGroup.setLayoutData(_gridData);
 
-		_gameBoard = new Canvas(gameGroup, SWT.BORDER);
+		_gameBoard = new Canvas(_gameGroup, SWT.BORDER);
 		_gridData = new GridData(GridData.FILL, GridData.FILL, true, true);
 		_gridData.minimumHeight = 200;
 		// _gridData.widthHint = 80;
@@ -130,7 +131,7 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 			}
 		});
 
-		_card = new Combo(gameGroup, SWT.PUSH);
+		_card = new Combo(_gameGroup, SWT.PUSH);
 
 		// GameCard.CardType[] cardTypes = GameCard.CardType.values();
 		// String[] cardNames = new String[cardTypes.length];
@@ -154,7 +155,7 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 		// }
 		// });
 
-		_btnChoose = new Button(gameGroup, SWT.PUSH);
+		_btnChoose = new Button(_gameGroup, SWT.PUSH);
 		_btnChoose.setText("Choose");
 		_gridData = new GridData(GridData.FILL, GridData.BEGINNING, true, false);
 		_gridData.horizontalIndent = 5;
@@ -170,6 +171,8 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 		// }
 		// });
 		drawDeck();
+
+		handleTurn(false);
 	}
 
 	private void initLoginWidget() {
@@ -310,13 +313,13 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 			public void handleEvent(Event e) {
 				if (image.getBounds().contains(new Point(e.x, e.y))) {
 					System.out.println("CLICKED!");
-					
+
 					if (_isConnected) {
 						GameMessage msg = new GameMessage(ClientAction.TAKE_CARD_FROM_DECK);
 						msg.setPlayerName(_client.getUsername());
 						_client.sendMessage(msg);
 					}
-						
+
 				}
 			}
 		});
@@ -418,7 +421,8 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 		} else if (e.widget == _btnChoose && _isConnected && _gameState != null) {
 
 			ArrayList<GameCard> playerCards = _gameState.getPlayers().get(_client.getUsername());
-			GameMessage msg = new GameMessage(_client.getUsername(), ClientAction.CHOSE_CARD, playerCards.get(_card.getSelectionIndex()));
+			GameMessage msg = new GameMessage(_client.getUsername(), ClientAction.CHOSE_CARD,
+					playerCards.get(_card.getSelectionIndex()));
 
 			_client.sendMessage(msg);
 
@@ -461,25 +465,36 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 		});
 	}
 
+	private void handleTurn(boolean isMyTurn) {
+		_gameGroup.setEnabled(isMyTurn);
+	}
+
 	@Override
 	public void onGameStateRecieved(GameMessage gameMsg) {
-		ArrayList<String> alUsers = new ArrayList<String>(gameMsg.getGameState().getPlayers().keySet());
-		_gameState = gameMsg.getGameState();
 
-		Display.getDefault().asyncExec(new Runnable() {
+		if (gameMsg.getGameState() != null) {
+			String currPlayer = gameMsg.getGameState().getCurrPlayer();
+			boolean isMyTurn = currPlayer.equals(_client.getUsername());
+			ArrayList<String> alUsers = new ArrayList<String>(gameMsg.getGameState().getPlayers().keySet());
+			_gameState = gameMsg.getGameState();
 
-			@Override
-			public void run() {
-				String[] strUsers = new String[alUsers.size()];
-				_users.setItems(alUsers.toArray(strUsers));
+			Display.getDefault().asyncExec(new Runnable() {
 
-				ArrayList<GameCard> playerCards = gameMsg.getGameState().getPlayers().get(_client.getUsername());
-				String[] arrCards = new String[playerCards.size()];
-				for (int i = 0; i < playerCards.size(); i++) {
-					arrCards[i] = playerCards.get(i).toString();
+				@Override
+				public void run() {
+					String[] strUsers = new String[alUsers.size()];
+					_users.setItems(alUsers.toArray(strUsers));
+
+					ArrayList<GameCard> playerCards = gameMsg.getGameState().getPlayers().get(_client.getUsername());
+					String[] arrCards = new String[playerCards.size()];
+					for (int i = 0; i < playerCards.size(); i++) {
+						arrCards[i] = playerCards.get(i).toString();
+					}
+					_card.setItems(arrCards);
+
+					handleTurn(isMyTurn);
 				}
-				_card.setItems(arrCards);
-			}
-		});
+			});
+		}
 	}
 }

@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Observer;
 
 import taki.common.GameCard;
 import taki.common.GameCard.CardColor;
@@ -17,6 +18,15 @@ public class GameLogic {
 	final private int INITIAL_HAND_SIZE = 8;
 
 	private GameState _gameState;
+	private Observer _observer;
+
+	public Observer getObserver() {
+		return _observer;
+	}
+
+	public void setObserver(Observer observer) {
+		_observer = observer;
+	}
 
 	public GameState getGameState() {
 		return _gameState;
@@ -163,15 +173,15 @@ public class GameLogic {
 		}
 		// This is the wrong player's turn
 		else {
-			System.out.println(
+			printMsg(
 					"Wrong player!\n" + playerName + " tried to take " + _gameState.getCurrPlayer() + "'s turn.");
 			bIsValid = false;
 		}
 
 		if (bIsValid) {
-			System.out.println(playerName + " played with " + card.toString());
+			printMsg(playerName + " played with " + card.toString());
 			if (!strNewColorMsg.equals("")) {
-				System.out.println(strNewColorMsg);
+				printMsg(strNewColorMsg);
 				strNewColorMsg = "";
 			}				
 			
@@ -207,7 +217,7 @@ public class GameLogic {
 			}
 		}
 		_gameState.setCurrPlayer(arrPlayerNames[i]);
-		System.out.println("It's " + arrPlayerNames[i] + "'s turn");
+		printMsg("It's " + arrPlayerNames[i] + "'s turn");
 	}
 	
 	public boolean takeNewCardFromDeck(String playerName) {
@@ -220,13 +230,13 @@ public class GameLogic {
 				_gameState.getPlayers().get(playerName).add(card);
 				_gameState.getGameDeck().remove(card);
 				
-				System.out.println(playerName + " took a card from the deck");
+				printMsg(playerName + " took a card from the deck");
 			}
 			
 		}
 		// This is the wrong player's turn
 		else {
-			System.out.println(
+			printMsg(
 					"Wrong player!\n" + playerName + " tried to take " + _gameState.getCurrPlayer() + "'s turn.");
 			bIsValid = false;
 		}
@@ -238,6 +248,14 @@ public class GameLogic {
 		_gameState.clearMoves();
 		if (lastCard != null && !lastCard.isCardSpecial()) {
 			_gameState.addLastCard(lastCard);
+		}
+	}
+	
+	private void printMsg(String strMsg) {
+		System.out.println(strMsg);
+		
+		if (_observer != null) {
+			_observer.update(null, strMsg);
 		}
 	}
 
