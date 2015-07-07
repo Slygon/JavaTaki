@@ -8,11 +8,9 @@ import java.util.Date;
 import java.util.Observable;
 import java.util.Observer;
 
-import taki.common.CardList;
+import taki.common.ChatMessage.MsgType;
 import taki.common.GameMessage;
-import taki.common.GameMessage.ClientAction;
 import taki.common.SystemMessage;
-import taki.common.UserList;
 
 /*
  * The server that can be run both as a console application or a GUI
@@ -210,13 +208,15 @@ public class Server implements Observer {
 		_gameLogic.playerLeft(ct.getUsername());
 		onClientshanged(ct);
 		display("Disconnected Client " + ct.getUsername() + " removed from list.");
+		broadcast(new GameMessage(ct.getUsername() + " left the game"));
 	}
 	
 	public void onClientConnected(ClientThread ct) { 
 		_al.add(ct);						// save it in the ArrayList
 		_gameLogic.playerJoined(ct.getUsername());
 		onClientshanged(ct);
-		display(ct.getUsername() + " just connected.");
+		display(ct.getUsername() + " just connected.");	
+		broadcast(new GameMessage(ct.getUsername() + " entered the game"));
 	}
 	
 	public void onClientshanged(ClientThread ct) {

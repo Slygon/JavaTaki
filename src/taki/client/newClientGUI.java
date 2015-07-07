@@ -467,6 +467,9 @@ public class newClientGUI implements ClientHandler, SelectionListener {
 
 	private void handleTurn(boolean isMyTurn) {
 		_gameGroup.setEnabled(isMyTurn);
+		if (isMyTurn) {
+			_txtMsgs.append("[Game] It's your turn !\n");
+		}
 	}
 
 	@Override

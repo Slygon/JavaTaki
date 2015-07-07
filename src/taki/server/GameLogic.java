@@ -187,6 +187,12 @@ public class GameLogic {
 			
 			_gameState.getPlayers().get(playerName).remove(card);
 			_gameState.getBurnedCards().add(card);
+			
+			if (_gameState.getPlayers().get(playerName).size() == 0) {
+				printMsg(playerName + " has won !");
+			}
+		} else {
+			printMsg(playerName + ", you can't play with " + card.toString() + " now");
 		}
 		
 		for (int i = 0; i < nTurnsToSkip; i++) {
@@ -232,7 +238,7 @@ public class GameLogic {
 				
 				printMsg(playerName + " took a card from the deck");
 			}
-			
+			switchTurn();
 		}
 		// This is the wrong player's turn
 		else {
